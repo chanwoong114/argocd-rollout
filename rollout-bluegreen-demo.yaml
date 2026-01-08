@@ -1,0 +1,57 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-bluegreen
+  namespace: default
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollout-bluegreen
+  template:
+    metadata:
+      labels:
+        app: rollout-bluegreen
+    spec:
+      containers:
+      - name: rollouts-demo
+        image: argoproj/rollouts-demo:blue
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+  strategy:
+    blueGreen: 
+      # 활성 서비스 (사용자 트래픽)
+      activeService: rollout-bluegreen-active
+      # 프리뷰 서비스 (새 버전 테스트용)
+      previewService: rollout-bluegreen-preview
+      autoPromotionEnabled: false
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rollout-bluegreen-active
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: rollout-bluegreen
+  ports:
+  - port: 80
+    targetPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rollout-bluegreen-preview
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: rollout-bluegreen
+  ports:
+  - port: 80
+    targetPort: 8080
