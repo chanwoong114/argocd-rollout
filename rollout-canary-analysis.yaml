@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: rollout-canary
+  namespace: default
+spec:
+  replicas: 5
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: rollout-canary
+  template:
+    metadata:
+      labels:
+        app: rollout-canary
+    spec:
+      containers:
+      - name: rollouts-demo
+        image: argoproj/rollouts-demo:blue # 시작은 Blue로 맞춤
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 5s}
+      # 20% 배포 후 테스트 실행 (여기서 실패하면 즉시 롤백)
+      - analysis:
+          templates:
+          - templateName: failure-test
+      - setWeight: 50
+      - pause: {duration: 10s}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rollout-canary
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: rollout-canary

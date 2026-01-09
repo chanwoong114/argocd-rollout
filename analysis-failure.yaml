@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: failure-test
+  namespace: default
+spec:
+  metrics:
+  - name: smoke-test
+    provider:
+      job:
+        spec:
+          backoffLimit: 0
+          template:
+            spec:
+              containers:
+              - name: test
+                image: alpine:3.18
+                command: [sh, -c, "echo 'Testing...'; sleep 5; echo 'Failed!'; exit 1"]
+              restartPolicy: Never
