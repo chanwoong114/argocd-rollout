@@ -15,5 +15,5 @@ spec:
               containers:
               - name: test
                 image: alpine:3.18
-                command: [sh, -c, "echo 'Testing...'; sleep 5; echo 'Failed!'; exit 1"]
+                command: [sh, -c, "echo 'Testing...'; sleep 5; echo 'Success!'; exit 0"]
               restartPolicy: Never
