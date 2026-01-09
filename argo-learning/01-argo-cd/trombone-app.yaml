@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trombone-rollout
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/chanwoong114/argocd-rollout.git
+    targetRevision: main
+    path: argo-learning/02-argo-rollouts
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
